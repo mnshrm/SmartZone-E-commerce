@@ -42,6 +42,8 @@ class ApiFeatures {
     return this;
   }
 
+  // For pagination
+  // Dividing our product listing to several product pages is called pagination
   pagination(resultPerPage) {
     // current page we are on right now
     const currentPage = Number(this.querySTR.page) || 1;
