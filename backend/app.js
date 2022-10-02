@@ -10,8 +10,10 @@ app.use(express.json());
 
 // Router imports
 const productRouter = require("./routes/productRoute.js");
+const userRouter = require("./routes/userRoute.js");
 
 app.use("/api/v1", productRouter);
+app.use("/api/v1", userRouter);
 
 // Middleware for error
 
