@@ -6,7 +6,9 @@
 const express = require("express");
 const app = express();
 const errorMiddleWare = require("./middleware/error.js");
+const cookieParser = require("cookie-parser");
 app.use(express.json());
+app.use(cookieParser());
 
 // Router imports
 const productRouter = require("./routes/productRoute.js");
