@@ -74,3 +74,119 @@ exports.getProductDetails = catchAsyncError(async (req, res, next) => {
   }
   res.status(200).json({ success: true, product });
 });
+
+// Create New review or update the review
+exports.createProductReview = catchAsyncError(async (req, res, next) => {
+  const { rating, comment, productId } = req.body;
+  const productReview = {
+    user: req.user.id,
+    name: req.user.name,
+    rating,
+    comment,
+  };
+
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    return next(new ErrorHandler("Product with given id does not exist", 404));
+  }
+  const isReviewed = product.reviews.find((rev) => {
+    return rev.user.toString() === req.user.id.toString();
+  });
+
+  if (isReviewed) {
+    product.reviews.forEach((rev) => {
+      if (rev.user.toString() === req.user.id) {
+        rev.rating = Number(rating);
+        rev.comment = comment;
+      }
+    });
+  } else {
+    product.reviews.push(productReview);
+    product.numOfReviews++;
+  }
+
+  let avg = 0;
+  product.reviews.forEach((rev) => {
+    avg += rev.rating;
+  });
+  product.ratings =
+    avg / (product.reviews.length === 0 ? 1 : product.reviews.length);
+
+  await product.save({ runValidators: false });
+
+  res.status(200).json({
+    success: true,
+    message: "Product review added",
+  });
+});
+
+// Get all reviews
+
+/**
+ * Requires product id
+ */
+
+exports.getProductReviews = catchAsyncError(async (req, res, next) => {
+  const productId = req.query.productId;
+
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    return next(new ErrorHandler("Product with given id does not exist", 404));
+  }
+
+  const productReviews = product.reviews;
+  const productRating = product.ratings;
+
+  res.status(200).json({
+    success: true,
+    productReviews,
+    productRating,
+  });
+});
+
+// Delete a review
+/**
+ *
+ */
+exports.deleteReview = catchAsyncError(async (req, res, next) => {
+  const productId = req.query.productId;
+
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    return next(new ErrorHandler("Product with given id does not exist", 404));
+  }
+
+  const reviews = product.reviews.filter(
+    (rev) => rev.id.toString() != req.query.reviewId.toString()
+  );
+
+  let avg = 0;
+  reviews.forEach((rev) => {
+    avg += rev.rating;
+  });
+  const ratings = avg / (reviews.length === 0 ? 1 : reviews.length);
+
+  const numOfReviews = reviews.length;
+
+  await Product.findByIdAndUpdate(
+    productId,
+    {
+      reviews,
+      ratings,
+      numOfReviews,
+    },
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Review deleted successfully",
+  });
+});
