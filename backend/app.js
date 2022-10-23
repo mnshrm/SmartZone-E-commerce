@@ -13,9 +13,11 @@ app.use(cookieParser());
 // Router imports
 const productRouter = require("./routes/productRoute.js");
 const userRouter = require("./routes/userRoute.js");
+const orderRouter = require("./routes/orderRoute.js");
 
 app.use("/api/v1", productRouter);
 app.use("/api/v1", userRouter);
+app.use("/api/v1", orderRouter);
 
 // Middleware for error
 
