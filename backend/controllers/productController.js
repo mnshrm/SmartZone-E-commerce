@@ -30,7 +30,7 @@ exports.getAllProducts = catchAsyncError(async (req, res) => {
 
 //Update Product --Admin
 
-exports.updateProduct = catchAsyncError(async (req, res) => {
+exports.updateProduct = catchAsyncError(async (req, res, next) => {
   if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
     let product = await Product.findById(req.params.id);
 
